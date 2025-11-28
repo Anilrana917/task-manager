@@ -8,18 +8,18 @@ const MOCK_TOKEN = 'mock_jwt_token_12345';
 
 export const authService = {
   async login(credentials) {
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Mock authentication - in real app, this would call your API
     if (credentials.username && credentials.password) {
       const userData = {
         user: MOCK_USER,
         token: MOCK_TOKEN
       };
       
-      localStorage.setItem('auth_token', MOCK_TOKEN);
-      localStorage.setItem('user_data', JSON.stringify(MOCK_USER));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', MOCK_TOKEN);
+        localStorage.setItem('user_data', JSON.stringify(MOCK_USER));
+      }
       
       return userData;
     }
@@ -28,9 +28,11 @@ export const authService = {
   },
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
-    window.location.href = '/login';
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
+      window.location.href = '/login';
+    }
   },
 
   getToken() {

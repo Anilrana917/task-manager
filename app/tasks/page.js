@@ -1,18 +1,23 @@
 'use client';
-// import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '../../services/authService';
 import TaskList from '../../components/TaskList/TaskList';
 import AuthGuard from '../../components/AuthGuard/AuthGuard';
+import ClientOnly from '../../components/ClientOnly/ClientOnly';
 
 export default function TasksPage() {
   const router = useRouter();
-  const user = authService.getUser();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // This will only run on client side
+    setUser(authService.getUser());
+  }, []);
 
   const handleLogout = () => {
     authService.logout();
-    router.push('/login');
   };
 
   return (
@@ -23,9 +28,11 @@ export default function TasksPage() {
             <div className="flex justify-between items-center py-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Task Manager</h1>
-                {user && (
-                  <p className="text-sm text-gray-600">Welcome, {user.username}!</p>
-                )}
+                <ClientOnly>
+                  {user && (
+                    <p className="text-sm text-gray-600">Welcome, {user.username}!</p>
+                  )}
+                </ClientOnly>
               </div>
               <div className="flex items-center space-x-4">
                 <Link

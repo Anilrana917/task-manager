@@ -4,6 +4,7 @@ import TaskCard from '../TaskCard/TaskCard';
 import SearchBar from '../SearchBar/SearchBar';
 import FilterSort from '../FilterSort/FilterSort';
 import { taskService } from '../../services/taskService';
+import ClientOnly from '../ClientOnly/ClientOnly';
 
 export default function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -39,7 +40,6 @@ export default function TaskList() {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort tasks
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'dueDate':
@@ -59,7 +59,7 @@ export default function TaskList() {
   const handleMarkCompleted = async (taskId) => {
     try {
       await taskService.markAsCompleted(taskId);
-      await loadTasks(); // Reload tasks to reflect changes
+      await loadTasks();
     } catch (error) {
       console.error('Error marking task as completed:', error);
     }
@@ -85,33 +85,35 @@ export default function TaskList() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-        <FilterSort
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredTasks.map(task => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onMarkCompleted={handleMarkCompleted}
-            onDelete={handleDeleteTask}
+    <ClientOnly>
+      <div className="space-y-6">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          <FilterSort
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
           />
-        ))}
-      </div>
-
-      {filteredTasks.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No tasks found. Create a new task to get started!</p>
         </div>
-      )}
-    </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTasks.map(task => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onMarkCompleted={handleMarkCompleted}
+              onDelete={handleDeleteTask}
+            />
+          ))}
+        </div>
+
+        {filteredTasks.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No tasks found. Create a new task to get started!</p>
+          </div>
+        )}
+      </div>
+    </ClientOnly>
   );
 }
